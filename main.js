@@ -18,11 +18,16 @@ let pressed = false;
 
 let mixer, clipAction, clipAction2;
 
+let knobAClicked = false;
+let knobARawValue = 50.0;
+let knobAMax = 100.0;
+let knobAMin = 0.0;
+let knobA;
+let knobAClickCenter;
+let text2;
+
 init();
 animate();
-let knobAClicked = false;
-let knobARawValue = 0.0;
-let knobA;
 
 function init() {
   const container = document.querySelector('#container');
@@ -163,6 +168,18 @@ function init() {
     // roughnessMipmapper.dispose();
   });
 
+  text2 = document.createElement('div');
+  text2.style.position = 'absolute';
+  //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+  text2.style.width = '50px';
+  text2.style.height = '20px';
+  text2.style.backgroundColor = 'black';
+  text2.style.color = 'white';
+  text2.innerHTML = `${knobARawValue}`;
+  text2.style.top = 200 + 'px';
+  text2.style.left = 200 + 'px';
+  document.body.appendChild(text2);
+
   renderer.shadowMap.enabled = true;
   // renderer.shadowMap.type = THREE.VSMShadowMap;
   renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -223,7 +240,11 @@ function onDocumentMouseMove(e) {
   console.log(mouse.y);
   if (knobAClicked) {
     console.log(knobA);
-    knobA.rotation.y += mouse.y * 2;
+    // knobA.rotation.y -= (knobAClickCenter - e.clientY) * 0.01;
+    knobARawValue += (knobAClickCenter - e.clientY) * 0.1;
+
+    knobAClickCenter = e.clientY;
+    text2.innerHTML = `${knobARawValue}`;
   }
 }
 
@@ -243,6 +264,8 @@ function onMouseDown(e) {
       knobAClicked == false
     ) {
       knobAClicked = true;
+      knobAClickCenter = e.clientY;
+
       console.log('knob a clicked');
     }
   }
