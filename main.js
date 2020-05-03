@@ -20,6 +20,9 @@ let mixer, clipAction, clipAction2;
 
 init();
 animate();
+let knobAClicked = false;
+let knobARawValue = 0.0;
+let knobA;
 
 function init() {
   const container = document.querySelector('#container');
@@ -147,6 +150,9 @@ function init() {
         console.log(obj.name);
         if (obj.name.includes('knob-type')) {
           obj.material = knobMat;
+          if (obj.name == 'knob-type-a') {
+            knobA = obj;
+          }
         }
       }
       // if (obj.isMesh) {
@@ -170,9 +176,9 @@ function init() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
 
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0, 0);
-  controls.update();
+  // controls = new OrbitControls(camera, renderer.domElement);
+  // controls.target.set(0, 0, 0);
+  // controls.update();
 
   raycaster = new THREE.Raycaster();
 
@@ -203,11 +209,22 @@ function animate() {
 
 // let selectedObject = null;
 
-function onDocumentMouseMove(event) {
-  event.preventDefault();
+function onDocumentMouseMove(e) {
+  e.preventDefault();
 
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  // update mouse coordinates
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  // clientY is 0 at top of window and increases as mouse moves down
+  // mouse.y is 1 at top, 0 at center, -1 at bottom
+
+  console.log(e.clientY);
+  console.log(mouse.y);
+  if (knobAClicked) {
+    console.log(knobA);
+    knobA.rotation.y += mouse.y * 2;
+  }
 }
 
 function onMouseDown(e) {
@@ -217,24 +234,26 @@ function onMouseDown(e) {
 
   // let intersects = raycaster.intersectObjects(scene.children, true);
   let intersects = raycaster.intersectObject(model, true);
+  console.log(intersects);
 
   if (intersects.length > 0) {
     if (
-      INTERSECTED != intersects[0].object &&
-      intersects[0].object.name === 'sa_low' &&
-      pressed == false
+      // INTERSECTED != intersects[0].object &&
+      intersects[0].object.name === 'knob-type-a' &&
+      knobAClicked == false
     ) {
-      pressed = true;
-      clipAction.play();
+      knobAClicked = true;
+      console.log('knob a clicked');
     }
   }
 }
 
 function onMouseUp(e) {
   e.preventDefault();
-  if (pressed == true) {
-    pressed = false;
-    clipAction2.play();
+
+  if (knobAClicked == true) {
+    knobAClicked = false;
+    console.log('knob a released');
   }
 }
 
@@ -262,7 +281,6 @@ function render() {
       INTERSECTED.currentHex = button.material.emissive.getHex();
       button.material.emissive.setHex(0xff0000);
 
-      button.rotation.x += 0.1;
       clipAction2.play();
     }
   } else {
