@@ -236,12 +236,10 @@ function onDocumentMouseMove(e) {
   // clientY is 0 at top of window and increases as mouse moves down
   // mouse.y is 1 at top, 0 at center, -1 at bottom
 
-  console.log(e.clientY);
-  console.log(mouse.y);
   if (knobAClicked) {
-    console.log(knobA);
     // knobA.rotation.y -= (knobAClickCenter - e.clientY) * 0.01;
     knobARawValue += (knobAClickCenter - e.clientY) * 0.1;
+    knobA.rotation.y = -knobARawValue;
 
     knobAClickCenter = e.clientY;
     text2.innerHTML = `${knobARawValue}`;
@@ -266,6 +264,7 @@ function onMouseDown(e) {
       knobAClicked = true;
       knobAClickCenter = e.clientY;
 
+      console.log(knobA);
       console.log('knob a clicked');
     }
   }
