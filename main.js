@@ -157,6 +157,7 @@ function init() {
           obj.material = knobMat;
           if (obj.name == 'knob-type-a') {
             knobA = obj;
+            obj.rotation.y = -knobARawValue;
           }
         }
       }
@@ -238,8 +239,13 @@ function onDocumentMouseMove(e) {
 
   if (knobAClicked) {
     // knobA.rotation.y -= (knobAClickCenter - e.clientY) * 0.01;
-    knobARawValue += (knobAClickCenter - e.clientY) * 0.1;
-    knobA.rotation.y = -knobARawValue;
+    knobARawValue += (knobAClickCenter - e.clientY) * 0.5;
+    knobARawValue =
+      knobARawValue > 100 ? 100 : knobARawValue < 0 ? 0 : knobARawValue;
+    let newRotation =
+      Math.PI * 0.75 +
+      ((-Math.PI * 0.75 - Math.PI * 0.75) / (100 - 0)) * (knobARawValue - 0);
+    knobA.rotation.y = newRotation;
 
     knobAClickCenter = e.clientY;
     text2.innerHTML = `${knobARawValue}`;
