@@ -23,8 +23,18 @@ let knobARawValue = 50.0;
 let knobAMax = 100.0;
 let knobAMin = 0.0;
 let knobA;
-let knobAClickCenter;
+let knobPrevVal;
 let text2;
+
+let knobBClicked = false;
+let knobBRawValue = 0.0;
+let knobBMax = 100.0;
+let knobBMin = 0.0;
+let knobB;
+let knobBNotches = 5;
+let prevNotch = 0;
+let text3;
+let text4;
 
 init();
 animate();
@@ -159,6 +169,10 @@ function init() {
             knobA = obj;
             obj.rotation.y = -knobARawValue;
           }
+          if (obj.name == 'knob-type-b') {
+            knobB = obj;
+            obj.rotation.y = -knobBRawValue;
+          }
         }
       }
       // if (obj.isMesh) {
@@ -180,6 +194,28 @@ function init() {
   text2.style.top = 200 + 'px';
   text2.style.left = 200 + 'px';
   document.body.appendChild(text2);
+
+  text3 = document.createElement('div');
+  text3.style.position = 'absolute';
+  text3.style.width = '50px';
+  text3.style.height = '20px';
+  text3.style.backgroundColor = 'black';
+  text3.style.color = 'white';
+  text3.innerHTML = `${knobBRawValue}`;
+  text3.style.top = 300 + 'px';
+  text3.style.left = 200 + 'px';
+  document.body.appendChild(text3);
+
+  text4 = document.createElement('div');
+  text4.style.position = 'absolute';
+  text4.style.width = '50px';
+  text4.style.height = '20px';
+  text4.style.backgroundColor = 'black';
+  text4.style.color = 'white';
+  text4.innerHTML = `${prevNotch}`;
+  text4.style.top = 350 + 'px';
+  text4.style.left = 200 + 'px';
+  document.body.appendChild(text4);
 
   renderer.shadowMap.enabled = true;
   // renderer.shadowMap.type = THREE.VSMShadowMap;
@@ -239,7 +275,7 @@ function onDocumentMouseMove(e) {
 
   if (knobAClicked) {
     // knobA.rotation.y -= (knobAClickCenter - e.clientY) * 0.01;
-    knobARawValue += (knobAClickCenter - e.clientY) * 0.5;
+    knobARawValue += (knobPrevVal - e.clientY) * 0.5;
     knobARawValue =
       knobARawValue > 100 ? 100 : knobARawValue < 0 ? 0 : knobARawValue;
     let newRotation =
@@ -247,8 +283,43 @@ function onDocumentMouseMove(e) {
       ((-Math.PI * 0.75 - Math.PI * 0.75) / (100 - 0)) * (knobARawValue - 0);
     knobA.rotation.y = newRotation;
 
-    knobAClickCenter = e.clientY;
+    knobPrevVal = e.clientY;
     text2.innerHTML = `${knobARawValue}`;
+  }
+  if (knobBClicked) {
+    // knobA.rotation.y -= (knobAClickCenter - e.clientY) * 0.01;
+    knobBRawValue += (knobPrevVal - e.clientY) * 0.5;
+    // min max limits
+    knobBRawValue =
+      knobBRawValue > 100 ? 100 : knobBRawValue < 0 ? 0 : knobBRawValue;
+
+    // if (knobBRawValue > knobPrevVal) {
+    //   if (knobBRawValue >= knobBMax / knobBNotches) {
+    //     knobBRawValue = knobBMax / knobBNotches;
+    //   } else {
+    //     knobBRawValue = knobPrevVal;
+    //   }
+    // }
+
+    for (let i = 0; i <= knobBNotches; i++) {
+      let notchVal = (knobBMax / knobBNotches) * i;
+      if (
+        Math.abs(knobBRawValue - notchVal) <
+        (knobBMax / knobBNotches) * 0.5
+      ) {
+        prevNotch = notchVal;
+      }
+    }
+
+    let newRotation =
+      Math.PI * 0.75 +
+      ((-Math.PI * 0.75 - Math.PI * 0.75) / (100 - 0)) * (prevNotch - 0);
+
+    knobB.rotation.y = newRotation;
+    text4.innerHTML = `${prevNotch}`;
+
+    knobPrevVal = e.clientY;
+    text3.innerHTML = `${knobBRawValue}`;
   }
 }
 
@@ -268,10 +339,19 @@ function onMouseDown(e) {
       knobAClicked == false
     ) {
       knobAClicked = true;
-      knobAClickCenter = e.clientY;
+      knobPrevVal = e.clientY;
 
       console.log(knobA);
       console.log('knob a clicked');
+    } else if (
+      intersects[0].object.name === 'knob-type-b' &&
+      knobBClicked == false
+    ) {
+      knobBClicked = true;
+      knobPrevVal = e.clientY;
+      prevNotch = knobBRawValue;
+
+      console.log(knobB);
     }
   }
 }
@@ -282,6 +362,10 @@ function onMouseUp(e) {
   if (knobAClicked == true) {
     knobAClicked = false;
     console.log('knob a released');
+  }
+  if (knobBClicked == true) {
+    knobBClicked = false;
+    console.log('knob b released');
   }
 }
 
